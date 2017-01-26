@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Electron Boilerplate</title>
+
+    <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
+    <link href="photon/css/photon.min.css" rel="stylesheet" type="text/css">
+
+    <script src="helpers/context_menu.js"></script>
+    <script src="helpers/external_links.js"></script>
+
+    <script src="app.js"></script>
+</head>
+<body>
+    <div class="window">
+        <div class="window-content">
+            <div class="pane-group">
+                <div class="pane-sm sidebar" id="navigation-pane">
+                    <nav class="nav-group">
+                        <h5 class="nav-group-title">Scripts</h5>
+                        <span class="nav-group-item active">
+                            <span class="icon icon-doc-text"></span>
+                            cool.imq
+                        </span>
+                        <span class="nav-group-item">
+                            <span class="icon icon-doc-text"></span>
+                            fizzbuzz.imq
+                        </span>
+
+                        <h5 class="nav-group-title">Images</h5>
+                        <span class="nav-group-item">
+                            <span class="icon icon-picture"></span>
+                            flowers.png
+                        </span>
+                        <span class="nav-group-item">
+                            <span class="icon icon-picture"></span>
+                            output.png
+                        </span>
+                    </nav>
+                </div>
+                <div class="pane" id="editor-pane">
+                    <p>This will eventually be the code editor</p>
+                </div>
+                <div class="pane" id="io-pane">
+                    <div style="height:50%" id="input-pane">
+                        <p>This will eventually be the input pane</p>
+                    </div>
+                    <hr>
+                    <div id="output-pane">
+                        <p>This will eventually be the output pane</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="toolbar toolbar-footer">
+            <div class="toolbar-actions">
+                <button class="btn btn-primary pull-right">
+                    Execute
+                </button>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
