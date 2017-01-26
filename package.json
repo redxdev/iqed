@@ -39,6 +39,7 @@
     "electron-mocha": "^3.0.0",
     "electron-rebuild": "^1.5.7",
     "ffi": "^2.2.0",
+    "finalize": "^1.0.4",
     "gulp": "^3.9.0",
     "gulp-batch": "^1.0.5",
     "gulp-less": "^3.0.3",
