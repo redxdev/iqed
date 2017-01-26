@@ -119,6 +119,56 @@ describe('imq binding library', function () {
             });
         });
 
+        describe('.getInteger()', function () {
+            it('should return integers on integer types', function () {
+                expect(QValue.Integer(123).getInteger()).to.equal(123);
+                expect(QValue.Integer(-567).getInteger()).to.equal(-567);
+            });
+
+            it ('should return null on non-integer types', function () {
+                expect(QValue.Bool(true).getInteger()).to.be.null;
+                expect(QValue.Float(123.45).getInteger()).to.be.null;
+                expect(QValue.String('foo bar').getInteger()).to.be.null;
+            });
+        });
+
+        describe('.getFloat()', function () {
+            it('should return floats on float types', function () {
+                expect(QValue.Float(123.45).getFloat()).to.be.closeTo(123.45, 0.001);
+                expect(QValue.Float(-84.23).getFloat()).to.be.closeTo(-84.23, 0.001);
+            });
+
+            it('should return null on non-float types', function () {
+                expect(QValue.Bool(true).getFloat()).to.be.null;
+                expect(QValue.Integer(123).getFloat()).to.be.null;
+                expect(QValue.String('foo bar').getFloat()).to.be.null;
+            });
+        });
+
+        describe('.getNumber()', function () {
+            it('should return numbers on numeric types', function () {
+                expect(QValue.Integer(123).getNumber()).to.equal(123);
+                expect(QValue.Float(-45.76).getNumber()).to.be.closeTo(-45.76, 0.001);
+            });
+
+            it('should return null on non-numeric types', function () {
+                expect(QValue.Bool(true).getNumber()).to.be.null;
+                expect(QValue.String('foo bar').getNumber()).to.be.null;
+            });
+        });
+
+        describe('.getString()', function () {
+            it('should return strings on string types', function () {
+                expect(QValue.String('foo bar').getString()).to.equal('foo bar');
+            });
+
+            it('should return null on non-string types', function () {
+                expect(QValue.Bool(true).getString()).to.be.null;
+                expect(QValue.Integer(123).getString()).to.be.null;
+                expect(QValue.Float(95.8).getString()).to.be.null;
+            });
+        });
+
     });
 
 });
