@@ -14,6 +14,10 @@
       "app/**/*",
       "node_modules/**/*",
       "package.json"
+    ],
+    "extraFiles": [
+      "*.dll",
+      "*.so"
     ]
   },
   "scripts": {
