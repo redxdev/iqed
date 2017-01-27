@@ -16,7 +16,7 @@ describe('imq binding library', function () {
     describe('.QValue', function () {
         let QValue = imq.QValue;
 
-        describe('#getTypeString()', function () {
+        describe('.getTypeString()', function () {
             it('should return a string representation of imq.type', function () {
                 expect(QValue.getTypeString(imq.type.Nil)).to.equal('Nil');
                 expect(QValue.getTypeString(imq.type.Bool)).to.equal('Bool');
@@ -32,7 +32,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('#Nil()', function () {
+        describe('.Nil()', function () {
             var val = QValue.Nil();
 
             it('should create a nil value', function () {
@@ -42,7 +42,7 @@ describe('imq binding library', function () {
 
         });
 
-        describe('#Bool()', function () {
+        describe('.Bool()', function () {
             var vTrue = QValue.Bool(true);
             var vFalse = QValue.Bool(false);
 
@@ -54,7 +54,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('#Integer()', function () {
+        describe('.Integer()', function () {
             var val = QValue.Integer(-138);
 
             it('should create an integer value', function () {
@@ -63,7 +63,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('#Float()', function () {
+        describe('.Float()', function () {
             var val = QValue.Float(45.67);
 
             it('should create a float value', function () {
@@ -72,7 +72,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('#String()', function () {
+        describe('.String()', function () {
             var val = QValue.String('foo bar');
             
             it('should create a string value', function () {
@@ -81,7 +81,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.asString()', function () {
+        describe('#asString()', function () {
             it('should return an empty string for nil', function () {
                 expect(QValue.Nil().asString()).to.equal('');
             });
@@ -106,7 +106,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.getBool()', function () {
+        describe('#getBool()', function () {
             it('should return booleans on boolean types', function () {
                 expect(QValue.Bool(true).getBool()).to.equal(true);
                 expect(QValue.Bool(false).getBool()).to.equal(false);
@@ -119,7 +119,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.getInteger()', function () {
+        describe('#getInteger()', function () {
             it('should return integers on integer types', function () {
                 expect(QValue.Integer(123).getInteger()).to.equal(123);
                 expect(QValue.Integer(-567).getInteger()).to.equal(-567);
@@ -132,7 +132,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.getFloat()', function () {
+        describe('#getFloat()', function () {
             it('should return floats on float types', function () {
                 expect(QValue.Float(123.45).getFloat()).to.be.closeTo(123.45, 0.001);
                 expect(QValue.Float(-84.23).getFloat()).to.be.closeTo(-84.23, 0.001);
@@ -145,7 +145,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.getNumber()', function () {
+        describe('#getNumber()', function () {
             it('should return numbers on numeric types', function () {
                 expect(QValue.Integer(123).getNumber()).to.equal(123);
                 expect(QValue.Float(-45.76).getNumber()).to.be.closeTo(-45.76, 0.001);
@@ -157,7 +157,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.getString()', function () {
+        describe('#getString()', function () {
             it('should return strings on string types', function () {
                 expect(QValue.String('foo bar').getString()).to.equal('foo bar');
             });
@@ -169,7 +169,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.toBool()', function () {
+        describe('#toBool()', function () {
             it('should return boolean values on convertable types', function () {
                 expect(QValue.Bool(true).toBool().getBool()).to.equal(true);
                 expect(QValue.Bool(false).toBool().getBool()).to.equal(false);
@@ -194,7 +194,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.toInteger()', function () {
+        describe('#toInteger()', function () {
             it('should return integer values on convertable types', function () {
                 expect(QValue.Bool(true).toInteger().getInteger()).to.equal(1);
                 expect(QValue.Bool(false).toInteger().getInteger()).to.equal(0);
@@ -216,7 +216,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.toFloat()', function () {
+        describe('#toFloat()', function () {
             it('should return float values on convertable types', function () {
                 expect(QValue.Bool(true).toFloat().getFloat()).to.equal(1);
                 expect(QValue.Bool(false).toFloat().getFloat()).to.equal(0);
@@ -237,7 +237,7 @@ describe('imq binding library', function () {
             });
         });
 
-        describe('.toString()', function () {
+        describe('#toString()', function () {
             it('should return string values on convertable types', function () {
                 expect(QValue.Nil().toString().getString()).to.equal('');
 
@@ -251,6 +251,35 @@ describe('imq binding library', function () {
                 expect(QValue.Float(-9.3).toString().getString()).to.equal('-9.3');
 
                 expect(QValue.String('hello world').toString().getString()).to.equal('hello world');
+            });
+        });
+
+    });
+
+    describe('.VMachine', function () {
+
+        let VMachine = imq.VMachine;
+        let CollectionMode = imq.CollectionMode;
+
+        describe('#getGCCollectionMode()', function () {
+            it('has a default of CollectionMode.NoBarriers', function () {
+                let vm = new VMachine();
+                expect(vm.getGCCollectionMode()).to.equal(CollectionMode.NoBarriers);
+            });
+        });
+
+        describe('#setGCCollectionMode()', function () {
+            it('sets the garbage collector collection mode', function () {
+                let vm = new VMachine();
+
+                vm.setGCCollectionMode(CollectionMode.Barriers);
+                expect(vm.getGCCollectionMode()).to.equal(CollectionMode.Barriers);
+
+                vm.setGCCollectionMode(CollectionMode.Always);
+                expect(vm.getGCCollectionMode()).to.equal(CollectionMode.Always);
+
+                vm.setGCCollectionMode(CollectionMode.NoBarriers);
+                expect(vm.getGCCollectionMode()).to.equal(CollectionMode.NoBarriers);
             });
         });
 

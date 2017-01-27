@@ -10,7 +10,7 @@ let cQObject = ref.types.void;
 let cQObjectPtr = ref.refType(cQObject);
 
 let cVMachine = ref.types.void;
-let cVMachinePtr = ref.refType(cVMachinePtr);
+let cVMachinePtr = ref.refType(cVMachine);
 
 var lib = ffi.Library('cimq', {
     // platform
@@ -46,6 +46,10 @@ var lib = ffi.Library('cimq', {
 
     'imqNewVMachine': [cVMachinePtr, []],
     'imqDestroyVMachine': [ref.types.void, [cVMachinePtr]],
+
+    'imqGCSetDebugMode': [ref.types.void, [cVMachinePtr, ref.types.bool]],
+    'imqGCGetCollectionMode': [ref.types.int, [cVMachinePtr]],
+    'imqGCSetCollectionMode': [ref.types.void, [cVMachinePtr, ref.types.int]],
 });
 
 export var type = {
@@ -63,6 +67,8 @@ export var CollectionMode = {
     Barriers: 1,
     Always: 2
 };
+
+export var getVersion = lib.imqGetVersion;
 
 export class QValue {
     constructor(raw) {
@@ -202,11 +208,32 @@ export class QValue {
     }
 }
 
-export var getVersion = lib.imqGetVersion;
+export class VMachine {
+    constructor() {
+        this.raw = lib.imqNewVMachine();
+        finalize(this, () => {
+            if (!this.raw.isNull())
+                lib.imqDestroyVMachine(this.raw);
+        });
+    }
+
+    setGCDebugMode(mode) {
+        lib.imqGCSetDebugMode(this.raw, mode);
+    }
+
+    getGCCollectionMode(mode) {
+        return lib.imqGCGetCollectionMode(this.raw);
+    }
+
+    setGCCollectionMode(mode) {
+        lib.imqGCSetCollectionMode(this.raw, mode);
+    }
+}
 
 export default {
     type: type,
     CollectionMode: CollectionMode,
+    getVersion: getVersion,
     QValue: QValue,
-    getVersion: getVersion
+    VMachine: VMachine,
 }
