@@ -50,6 +50,7 @@ var lib = ffi.Library('cimq', {
     'imqGCSetDebugMode': [ref.types.void, [cVMachinePtr, ref.types.bool]],
     'imqGCGetCollectionMode': [ref.types.int, [cVMachinePtr]],
     'imqGCSetCollectionMode': [ref.types.void, [cVMachinePtr, ref.types.int]],
+    'imqExecuteString': [ref.types.bool, [cVMachinePtr, ref.types.CString, ref.refType(cQObjectPtr)]],
 });
 
 export var type = {
@@ -227,6 +228,15 @@ export class VMachine {
 
     setGCCollectionMode(mode) {
         lib.imqGCSetCollectionMode(this.raw, mode);
+    }
+
+    execute(data) {
+        var result = ref.alloc(cQValuePtr);
+        var success = lib.imqExecuteString(this.raw, data, result);
+        return {
+            success: success,
+            result: new QValue(result.deref())
+        }
     }
 }
 

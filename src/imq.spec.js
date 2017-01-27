@@ -283,6 +283,40 @@ describe('imq binding library', function () {
             });
         });
 
+        describe('#execute()', function () {
+            it('should execute a simple string successfully', function () {
+                let vm = new VMachine();
+
+                var result = vm.execute("foo = 'bar';");
+                expect(result.success).to.be.true;
+                expect(result.result.getType()).to.equal(imq.type.Nil);
+            });
+
+            it('should report the value of the final expression', function () {
+                let vm = new VMachine();
+
+                var result = vm.execute("foo = 'bar';\nfoo;");
+                expect(result.success).to.be.true;
+                expect(result.result.getString()).to.equal('bar');
+            });
+
+            it('should report syntax errors', function () {
+                let vm = new VMachine();
+
+                var result = vm.execute("foo =");
+                expect(result.success).to.be.false;
+                expect(result.result.getString()).to.equal("line 1:5: no viable alternative at input 'foo ='");
+            });
+
+            it('should report runtime errors', function () {
+                let vm = new VMachine();
+
+                var result = vm.execute("foo = bar;");
+                expect(result.success).to.be.false;
+                expect(result.result.getString()).to.equal('line 1:6: Unknown variable "bar"');
+            });
+        });
+
     });
 
 });
