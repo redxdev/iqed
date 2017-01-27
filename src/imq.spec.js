@@ -169,6 +169,91 @@ describe('imq binding library', function () {
             });
         });
 
+        describe('.toBool()', function () {
+            it('should return boolean values on convertable types', function () {
+                expect(QValue.Bool(true).toBool().getBool()).to.equal(true);
+                expect(QValue.Bool(false).toBool().getBool()).to.equal(false);
+
+                expect(QValue.Integer(1).toBool().getBool()).to.equal(true);
+                expect(QValue.Integer(0).toBool().getBool()).to.equal(false);
+                expect(QValue.Integer(-15).toBool().getBool()).to.equal(true);
+
+                expect(QValue.Float(10.4).toBool().getBool()).to.equal(true);
+                expect(QValue.Float(-4.32).toBool().getBool()).to.equal(true);
+                expect(QValue.Float(0).toBool().getBool()).to.equal(false);
+                expect(QValue.Float(0.00001).toBool().getBool()).to.equal(true);
+
+                expect(QValue.String("true").toBool().getBool()).to.equal(true);
+                expect(QValue.String("false").toBool().getBool()).to.equal(false);
+            });
+
+            it('should return null on unconvertable types', function () {
+                expect(QValue.String("TRUE").toBool()).to.be.null;
+                expect(QValue.String("FALSE").toBool()).to.be.null;
+                expect(QValue.String("foo BaR true false").toBool()).to.be.null;
+            });
+        });
+
+        describe('.toInteger()', function () {
+            it('should return integer values on convertable types', function () {
+                expect(QValue.Bool(true).toInteger().getInteger()).to.equal(1);
+                expect(QValue.Bool(false).toInteger().getInteger()).to.equal(0);
+
+                expect(QValue.Integer(123).toInteger().getInteger()).to.equal(123);
+
+                expect(QValue.Float(10.459).toInteger().getInteger()).to.equal(10);
+                expect(QValue.Float(15.97).toInteger().getInteger()).to.equal(15);
+                expect(QValue.Float(-10.98).toInteger().getInteger()).to.equal(-10);
+                expect(QValue.Float(-13.0384).toInteger().getInteger()).to.equal(-13);
+
+                expect(QValue.String('123').toInteger().getInteger()).to.equal(123);
+                expect(QValue.String('-8839').toInteger().getInteger()).to.equal(-8839);
+            });
+
+            it('should return null values on unconvertable types', function () {
+                expect(QValue.String('foo bAr 129').toInteger()).to.be.null;
+                expect(QValue.String('99.58').toInteger()).to.be.null;
+            });
+        });
+
+        describe('.toFloat()', function () {
+            it('should return float values on convertable types', function () {
+                expect(QValue.Bool(true).toFloat().getFloat()).to.equal(1);
+                expect(QValue.Bool(false).toFloat().getFloat()).to.equal(0);
+
+                expect(QValue.Integer(123).toFloat().getFloat()).to.equal(123);
+                expect(QValue.Integer(-449).toFloat().getFloat()).to.equal(-449);
+
+                expect(QValue.Float(99.45).toFloat().getFloat()).to.be.closeTo(99.45, 0.0001);
+                expect(QValue.Float(-894.1).toFloat().getFloat()).to.be.closeTo(-894.1, 0.0001);
+
+                expect(QValue.String('190').toFloat().getFloat()).to.equal(190);
+                expect(QValue.String('-93.219').toFloat().getFloat()).to.be.closeTo(-93.219, 0.0001);
+            });
+
+            it('should return null values on unconvertable types', function () {
+                expect(QValue.String('193.58 foo bar').toFloat()).to.be.null;
+                expect(QValue.String('bar baz 91930hc').toFloat()).to.be.null;
+            });
+        });
+
+        describe('.toString()', function () {
+            it('should return string values on convertable types', function () {
+                expect(QValue.Nil().toString().getString()).to.equal('');
+
+                expect(QValue.Bool(true).toString().getString()).to.equal('true');
+                expect(QValue.Bool(false).toString().getString()).to.equal('false');
+
+                expect(QValue.Integer(123).toString().getString()).to.equal('123');
+                expect(QValue.Integer(-449).toString().getString()).to.equal('-449');
+
+                expect(QValue.Float(19.4).toString().getString()).to.equal('19.4');
+                expect(QValue.Float(-9.3).toString().getString()).to.equal('-9.3');
+
+                expect(QValue.String('hello world').toString().getString()).to.equal('hello world');
+            });
+        });
+
     });
 
 });

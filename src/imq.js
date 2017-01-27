@@ -9,6 +9,9 @@ let cQValueType = ref.types.int;
 let cQObject = ref.types.void;
 let cQObjectPtr = ref.refType(cQObject);
 
+let cVMachine = ref.types.void;
+let cVMachinePtr = ref.refType(cVMachinePtr);
+
 var lib = ffi.Library('cimq', {
     // platform
     'imqGetVersion': [ref.types.CString, []],
@@ -40,6 +43,9 @@ var lib = ffi.Library('cimq', {
     'imqToInteger': [cQValuePtr, [cQValuePtr]],
     'imqToFloat': [cQValuePtr, [cQValuePtr]],
     'imqToString': [cQValuePtr, [cQValuePtr]],
+
+    'imqNewVMachine': [cVMachinePtr, []],
+    'imqDestroyVMachine': [ref.types.void, [cVMachinePtr]],
 });
 
 export var type = {
@@ -52,11 +58,21 @@ export var type = {
     Object: 6
 };
 
+export var CollectionMode = {
+    NoBarriers: 0,
+    Barriers: 1,
+    Always: 2
+};
+
 export class QValue {
     constructor(raw) {
+        if (raw.isNull())
+            throw new ReferenceError("Cannot construct QValue from null reference.");
+
         this.raw = raw;
         finalize(this, () => {
-            lib.imqDestroyValue(this.raw);
+            if (!this.raw.isNull())
+                lib.imqDestroyValue(this.raw);
         });
     }
 
@@ -155,7 +171,7 @@ export class QValue {
 
     toBool() {
         var result = lib.imqToBool(this.raw);
-        if (result)
+        if (!result.isNull())
             return new QValue(result);
 
         return null;
@@ -163,7 +179,7 @@ export class QValue {
 
     toInteger() {
         var result = lib.imqToInteger(this.raw);
-        if (result)
+        if (!result.isNull())
             return new QValue(result);
 
         return null;
@@ -171,7 +187,7 @@ export class QValue {
 
     toFloat() {
         var result = lib.imqToFloat(this.raw);
-        if (result)
+        if (!result.isNull())
             return new QValue(result);
 
         return null;
@@ -179,7 +195,7 @@ export class QValue {
 
     toString() {
         var result = lib.imqToString(this.raw);
-        if (result)
+        if (!result.isNull())
             return new QValue(result);
 
         return null;
@@ -190,6 +206,7 @@ export var getVersion = lib.imqGetVersion;
 
 export default {
     type: type,
+    CollectionMode: CollectionMode,
     QValue: QValue,
     getVersion: getVersion
 }

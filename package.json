@@ -42,6 +42,7 @@
     "electron-builder": "^8.6.0",
     "electron-mocha": "^3.0.0",
     "electron-rebuild": "^1.5.7",
+    "etch": "^0.8.0",
     "ffi": "^2.2.0",
     "finalize": "^1.0.4",
     "gulp": "^3.9.0",
