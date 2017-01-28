@@ -34,7 +34,8 @@
     "rebuild": "electron-rebuild"
   },
   "dependencies": {
-    "fs-jetpack": "^0.10.2"
+    "fs-jetpack": "^0.10.2",
+    "monaco-editor": "^0.8.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

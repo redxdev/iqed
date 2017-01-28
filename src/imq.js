@@ -50,7 +50,14 @@ var lib = ffi.Library('cimq', {
     'imqGCSetDebugMode': [ref.types.void, [cVMachinePtr, ref.types.bool]],
     'imqGCGetCollectionMode': [ref.types.int, [cVMachinePtr]],
     'imqGCSetCollectionMode': [ref.types.void, [cVMachinePtr, ref.types.int]],
-    'imqExecuteString': [ref.types.bool, [cVMachinePtr, ref.types.CString, ref.refType(cQObjectPtr)]],
+    'imqGCGetManagedCount': [ref.types.uint, [cVMachinePtr]],
+    'imqGCGetTrackedMemory': [ref.types.uint, [cVMachinePtr]],
+    'imqGCGetCollectionBarrier': [ref.types.uint, [cVMachinePtr]],
+    'imqGCCollect': [ref.types.bool, [cVMachinePtr, ref.types.bool]],
+
+    'imqExecuteString': [ref.types.bool, [cVMachinePtr, ref.types.CString, ref.refType(cQValuePtr)]],
+
+    'imqRegisterStandardLibrary': [ref.types.bool, [cVMachinePtr, ref.refType(cQValuePtr)]],
 });
 
 export var type = {
@@ -230,6 +237,25 @@ export class VMachine {
         lib.imqGCSetCollectionMode(this.raw, mode);
     }
 
+    getGCManagedCount() {
+        return lib.imqGCGetManagedCount(this.raw);
+    }
+
+    getGCTrackedMemory() {
+        return lib.imqGCGetTrackedMemory(this.raw);
+    }
+
+    getGCCollectionBarrier() {
+        return lib.imqGCGetCollectionBarrier(this.raw);
+    }
+
+    gcCollect(force) {
+        if (force === undefined)
+            force = false;
+        
+        return lib.imqGCCollect(this.raw, force);
+    }
+
     execute(data) {
         var result = ref.alloc(cQValuePtr);
         var success = lib.imqExecuteString(this.raw, data, result);
@@ -237,6 +263,15 @@ export class VMachine {
             success: success,
             result: new QValue(result.deref())
         }
+    }
+
+    registerStandardLibrary() {
+        var result = ref.alloc(cQValuePtr);
+        var success = lib.imqRegisterStandardLibrary(this.raw, result);
+        return {
+            success: success,
+            result: new QValue(result.deref())
+        };
     }
 }
 

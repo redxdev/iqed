@@ -283,6 +283,47 @@ describe('imq binding library', function () {
             });
         });
 
+        describe('#getGCManagedCount()', function () {
+            it('should return a number', function () {
+                let vm = new VMachine();
+
+                expect(vm.getGCManagedCount()).to.be.a('number');
+            });
+        });
+
+        describe('#getGCTrackedMemory()', function () {
+            it('should return a number', function () {
+                let vm = new VMachine();
+
+                expect(vm.getGCTrackedMemory()).to.be.a('number');
+            });
+        });
+
+        describe('#getGCCollectionBarrier()', function () {
+            it('should return a number', function () {
+                let vm = new VMachine();
+
+                expect(vm.getGCCollectionBarrier()).to.be.a('number');
+            });
+        });
+
+        describe('#gcCollect()', function () {
+            it('should collect garbage objects', function () {
+                let vm = new VMachine();
+
+                expect(vm.execute('foo = {1,2,3,4};').success).to.be.true;
+
+                var beforeCount = vm.getGCManagedCount();
+
+                expect(vm.execute('delete foo;').success).to.be.true;
+                expect(vm.gcCollect(true)).to.be.true;
+
+                var afterCount = vm.getGCManagedCount();
+
+                expect(beforeCount).to.be.greaterThan(afterCount);
+            });
+        })
+
         describe('#execute()', function () {
             it('should execute a simple string successfully', function () {
                 let vm = new VMachine();
@@ -314,6 +355,25 @@ describe('imq binding library', function () {
                 var result = vm.execute("foo = bar;");
                 expect(result.success).to.be.false;
                 expect(result.result.getString()).to.equal('line 1:6: Unknown variable "bar"');
+            });
+        });
+
+        describe('#registerStandardLibrary()', function () {
+            it('should register the standard library without errors', function () {
+                let vm = new VMachine();
+
+                var result = vm.registerStandardLibrary();
+                expect(result.success).to.be.true;
+                expect(result.result.getType()).to.equal(imq.type.Nil);
+            });
+
+            it('should make the standard library usable by the virtual machine', function () {
+                let vm = new VMachine();
+                vm.registerStandardLibrary();
+
+                var result = vm.execute("clamp(10, 1, 5);");
+                expect(result.success).to.be.true;
+                expect(result.result.getInteger()).to.equal(5);
             });
         });
 
