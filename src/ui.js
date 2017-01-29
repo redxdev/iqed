@@ -1,6 +1,8 @@
 import GoldenLayout from 'golden-layout';
 import $ from 'jquery';
+
 import codeEditor from './ui/code-editor';
+import browser from './ui/browser';
 
 var layout = null;
 
@@ -13,19 +15,11 @@ export function getDefaultContent() {
         type: 'row',
         content: [{
             type: 'component',
-            componentName: 'codeEditor',
-            componentState: {filename: 'foobar.txt'}
+            componentName: 'browser',
+            width: 20
         }, {
-            type: 'column',
-            content: [{
-                type: 'component',
-                componentName: 'testComponent',
-                componentState: {label: 'B'}
-            }, {
-                type: 'component',
-                componentName: 'testComponent',
-                componentState: {label: 'C'}
-            }]
+            type: 'component',
+            componentName: 'codeEditor'
         }]
     }];
 }
@@ -48,6 +42,7 @@ export function init() {
     });
 
     layout.registerComponent('codeEditor', codeEditor);
+    layout.registerComponent('browser', browser);
 
     layout.init();
 }

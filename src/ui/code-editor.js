@@ -43,4 +43,40 @@ export default function (container, componentState) {
             tab.setTitle(componentState.filename);
         }
     });
+};
+
+export function findFirstEditor(layout) {
+    var stack = [layout.root];
+    var found = null;
+    while (stack.length > 0 && found === null) {
+        var current = stack[0];
+        if (current.type === 'component' && current.componentName === 'codeEditor') {
+            found = current;
+            break;
+        }
+
+        stack.shift();
+        if (current.contentItems !== undefined)
+            stack = stack.concat(current.contentItems);
+    }
+
+    return found;
+}
+
+export function openEditor(layout, path) {
+    var container = findFirstEditor(layout);
+    if (container === null) {
+        container = layout.root;
+        if (container.contentItems.length > 0)
+            container = container.contentItems[0];
+    }
+    else {
+        container = container.parent;
+    }
+
+    container.addChild({
+        type: 'component',
+        componentName: 'codeEditor',
+        componentState: {filename: path}
+    });
 }

@@ -6,6 +6,7 @@
 
     <link href="../node_modules/golden-layout/src/css/goldenlayout-base.css" rel="stylesheet" type="text/css">
     <link href="../node_modules/golden-layout/src/css/goldenlayout-dark-theme.css" rel="stylesheet" type="text/css">
+    <link href="../node_modules/jstree/dist/themes/default-dark/style.min.css" rel="stylesheet" type="text/css">
     <link href="stylesheets/main.css" rel="stylesheet" type="text/css">
 
     <script src="helpers/context_menu.js"></script>
@@ -14,6 +15,7 @@
     <!-- Workaround for monaco's amd loader -->
     <script>
         window.$ = require('jquery');
+        require('jstree');
         require('./app');
 
         var nodeRequire = global.require;

@@ -271,12 +271,18 @@ export class VMachine {
     executeAsync(data, cb) {
         var result = ref.alloc(cQValuePtr);
         lib.imqExecuteString.async(this.raw, data, result, function (err, success) {
-            if (err) throw err;
-
-            cb({
-                success: success,
-                result: result
-            });
+            if (err) {
+                cb({
+                    success: false,
+                    result: err
+                });
+            }
+            else {
+                cb({
+                    success: success,
+                    result: result
+                });
+            }
         });
     }
 
