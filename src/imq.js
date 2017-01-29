@@ -77,6 +77,9 @@ export var CollectionMode = {
 };
 
 export var getVersion = lib.imqGetVersion;
+export function getProvider() {
+    return 'cimq';
+}
 
 export class QValue {
     constructor(raw) {
@@ -265,6 +268,18 @@ export class VMachine {
         }
     }
 
+    executeAsync(data, cb) {
+        var result = ref.alloc(cQValuePtr);
+        lib.imqExecuteString.async(this.raw, data, result, function (err, success) {
+            if (err) throw err;
+
+            cb({
+                success: success,
+                result: result
+            });
+        });
+    }
+
     registerStandardLibrary() {
         var result = ref.alloc(cQValuePtr);
         var success = lib.imqRegisterStandardLibrary(this.raw, result);
@@ -279,6 +294,7 @@ export default {
     type: type,
     CollectionMode: CollectionMode,
     getVersion: getVersion,
+    getProvider: getProvider,
     QValue: QValue,
     VMachine: VMachine,
 }
