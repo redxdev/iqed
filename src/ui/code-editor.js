@@ -1,6 +1,7 @@
 import jetpack from 'fs-jetpack';
 import {ipcRenderer} from 'electron';
 import {findAllComponents, getLayout} from '../ui';
+const remote = require('electron').remote;
 
 export default function (container, componentState) {
     this.editor = monaco.editor.create(container.getElement().get(0), {
@@ -14,6 +15,36 @@ export default function (container, componentState) {
         run: () => {
             container.parent.remove();
             return null;
+        }
+    });
+
+    this.editor.addAction({
+        id: 'save-file',
+        label: 'Save File',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
+        run: (ed) => {
+            if (this._filename === null)
+                return this.editor.getAction('save-file-as').run(ed);
+
+            return jetpack.writeAsync(this._filename, this.editor.getValue());
+        }
+    });
+
+    this.editor.addAction({
+        id: 'save-file-as',
+        label: 'Save File As',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_S],
+        run: () => {
+            var path = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+                title: 'Save File As',
+                defaultPath: this._filename === null ? undefined : this._filename
+            });
+
+            this._filename = path;
+            var tabName = this._filename.replace(/^.*[\\\/]/, '');
+            container.tab.setTitle(tabName);
+
+            return jetpack.writeAsync(this._filename, this.editor.getValue());
         }
     });
 
@@ -46,9 +77,9 @@ export default function (container, componentState) {
     }
 
     this._filename = componentState.filename !== undefined ? jetpack.path(componentState.filename) : null;
-    var tabName = this._filename !== null ? this._filename.replace(/^.*[\\\/]/, '') : 'New File';
 
     container.on('tab', (tab) => {
+        var tabName = this._filename !== null ? this._filename.replace(/^.*[\\\/]/, '') : 'New File';
         tab.setTitle(tabName);
     });
 };
@@ -63,7 +94,7 @@ export function openEditor(layout, path) {
         }
     }
 
-    var container = editors[0];
+    var container = editors.length > 0 ? editors[0] : null;
     if (container === null) {
         container = layout.root;
         if (container.contentItems.length > 0)

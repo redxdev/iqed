@@ -1,4 +1,5 @@
 import jetpack from 'fs-jetpack';
+import chokidar from 'chokidar';
 import {openEditor} from './code-editor';
 import {ipcRenderer} from 'electron';
 import {getLayout, findFirstComponent} from '../ui';
@@ -113,6 +114,18 @@ export default function (container, componentState) {
 
         var filePath = buildPathFromNode(instance, path, node);
         openEditor(container.layoutManager, filePath);
+    });
+
+    // TODO: This is a really inefficient way to deal with filesystem changes, especially on large directory trees.
+    var watchCb = () => {this._tree.jstree('refresh')};
+    var watcher = chokidar.watch(this._path, {ignoreInitial: true})
+        .on('add', watchCb)
+        .on('addDir', watchCb)
+        .on('unlink', watchCb)
+        .on('unlinkDir', watchCb);
+
+    container.on('destroy', () => {
+        watcher.close();
     });
 };
 
