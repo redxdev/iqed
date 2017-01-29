@@ -6,8 +6,10 @@
 import path from 'path';
 import url from 'url';
 import { app, Menu } from 'electron';
+import { fileMenuTemplate } from './menu/file_menu_template';
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
+import { viewMenuTemplate } from './menu/view_menu_template';
 import createWindow from './helpers/window';
 
 // Special module holding environment variables which you declared
@@ -16,8 +18,12 @@ import env from './env';
 
 var mainWindow;
 
+export function getMainWindow() {
+    return mainWindow;
+}
+
 var setApplicationMenu = function () {
-    var menus = [editMenuTemplate];
+    var menus = [fileMenuTemplate, editMenuTemplate, viewMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }
@@ -35,7 +41,7 @@ if (env.name !== 'production') {
 app.on('ready', function () {
     setApplicationMenu();
 
-    var mainWindow = createWindow('main', {
+    mainWindow = createWindow('main', {
         width: 1000,
         height: 600
     });

@@ -1,8 +1,20 @@
 import jetpack from 'fs-jetpack';
+import {ipcRenderer} from 'electron';
+import {findAllComponents, getLayout} from '../ui';
 
 export default function (container, componentState) {
     this.editor = monaco.editor.create(container.getElement().get(0), {
         theme: 'vs-dark'
+    });
+
+    this.editor.addAction({
+        id: 'close-editor',
+        label: 'Close Editor',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_W],
+        run: () => {
+            container.parent.remove();
+            return null;
+        }
     });
 
     this.editor.layout();
@@ -17,7 +29,7 @@ export default function (container, componentState) {
             .then((result) => {
                 if (result !== 'file') {
                     this.editor.updateOptions({readOnly: false});
-                    console.log('File "' + componentState.filename + '" does not exist or is not a file');
+                    console.warn('File "' + componentState.filename + '" does not exist or is not a file');
                 }
                 else {
                     jetpack.readAsync(componentState.filename)
@@ -27,44 +39,31 @@ export default function (container, componentState) {
                         })
                         .catch((err) => {
                             this.editor.setValue('Unable to load "' + componentState.filename + '": ' + err);
-                            console.log('Unable to load "' + componentState.filename + '"', err);
+                            console.warn('Unable to load "' + componentState.filename + '"', err);
                         });
                 }
             });
     }
 
+    this._filename = componentState.filename !== undefined ? jetpack.path(componentState.filename) : null;
+    var tabName = this._filename !== null ? this._filename.replace(/^.*[\\\/]/, '') : 'New File';
+
     container.on('tab', (tab) => {
-        if (componentState.filename === undefined)
-        {
-            tab.setTitle('New File');
-        }
-        else
-        {
-            tab.setTitle(componentState.filename);
-        }
+        tab.setTitle(tabName);
     });
 };
 
-export function findFirstEditor(layout) {
-    var stack = [layout.root];
-    var found = null;
-    while (stack.length > 0 && found === null) {
-        var current = stack[0];
-        if (current.type === 'component' && current.componentName === 'codeEditor') {
-            found = current;
-            break;
+export function openEditor(layout, path) {
+    var editors = findAllComponents(layout, 'codeEditor');
+    for (var i = 0; i < editors.length; ++i) {
+        var editor = editors[i];
+        if (editor.instance._filename !== null && path !== undefined && jetpack.path(editor.instance._filename) === jetpack.path(path)) {
+            editor.tab.header.setActiveContentItem(editor);
+            return;
         }
-
-        stack.shift();
-        if (current.contentItems !== undefined)
-            stack = stack.concat(current.contentItems);
     }
 
-    return found;
-}
-
-export function openEditor(layout, path) {
-    var container = findFirstEditor(layout);
+    var container = editors[0];
     if (container === null) {
         container = layout.root;
         if (container.contentItems.length > 0)
@@ -80,3 +79,11 @@ export function openEditor(layout, path) {
         componentState: {filename: path}
     });
 }
+
+ipcRenderer.on('file.new', function () {
+    openEditor(getLayout());
+});
+
+ipcRenderer.on('file.open-file', function (emitter, filename) {
+    openEditor(getLayout(), filename);
+});

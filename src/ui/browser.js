@@ -1,5 +1,7 @@
 import jetpack from 'fs-jetpack';
 import {openEditor} from './code-editor';
+import {ipcRenderer} from 'electron';
+import {getLayout, findFirstComponent} from '../ui';
 
 function getFiles(tree, path, cb) {
     jetpack.listAsync(path)
@@ -42,14 +44,15 @@ function buildPathFromNode(tree, root, obj) {
 export default function (container, componentState) {
     container.getElement().addClass('allow-scroll');
 
-    container.on('tab', function (tab) {
-        tab.setTitle('Browser');
-    });
-
     var path = jetpack.cwd();
     if (componentState.path !== undefined) {
         path = componentState.path;
     }
+    this._path = path;
+
+    container.on('tab', function (tab) {
+        tab.setTitle('Browser');
+    });
 
     this._tree = container.getElement().jstree({
         plugins: ['sort', 'wholerow', 'types'],
@@ -112,3 +115,36 @@ export default function (container, componentState) {
         openEditor(container.layoutManager, filePath);
     });
 };
+
+export function openBrowser(layout, path) {
+    var container = findFirstComponent(layout, 'browser');
+    if (container === null) {
+        container = layout.root;
+        if (container.contentItems.length > 0)
+            container = container.contentItems[0];
+
+        container.addChild({
+            type: 'component',
+            componentName: 'browser',
+            componentState: {filename: path}
+        });
+    }
+    else {
+        if (path === undefined)
+            return;
+
+        container.parent.replaceChild(container, {
+            type: 'component',
+            componentName: 'browser',
+            componentState: {path: path}
+        });
+    }
+}
+
+ipcRenderer.on('view.browser.show', function () {
+    openBrowser(getLayout());
+});
+
+ipcRenderer.on('file.open-directory', function (emitter, dir) {
+    openBrowser(getLayout(), dir);
+});

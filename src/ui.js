@@ -1,5 +1,6 @@
 import GoldenLayout from 'golden-layout';
 import $ from 'jquery';
+import {ipcRenderer} from 'electron';
 
 import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
@@ -24,13 +25,17 @@ export function getDefaultContent() {
     }];
 }
 
-export function init() {
+export function init(content) {
     if (layout !== null) {
         throw new Error("UI Layout already initialized, cannot call init() again!");
     }
 
+    if (content === undefined) {
+        content = getDefaultContent();
+    }
+
     layout = new GoldenLayout({
-        content: getDefaultContent(),
+        content: content,
         settings: {
             showPopoutIcon: false,
         }
@@ -47,8 +52,58 @@ export function init() {
     layout.init();
 }
 
+export function resetLayout(force) {
+    if (force === true || confirm('Are you sure you want to reset the editor layout? You will lose any unsaved work!')) {
+        layout.destroy();
+        layout = null;
+        init(getDefaultContent());
+    }
+}
+
+export function findFirstComponent(layout, componentName) {
+    var stack = [layout.root];
+    var found = null;
+    while (stack.length > 0 && found === null) {
+        var current = stack[0];
+        if (current.type === 'component' && current.componentName === componentName) {
+            found = current;
+            break;
+        }
+
+        stack.shift();
+        if (current.contentItems !== undefined)
+            stack = stack.concat(current.contentItems);
+    }
+
+    return found;
+}
+
+export function findAllComponents(layout, componentName) {
+    var stack = [layout.root];
+    var found = [];
+    while (stack.length > 0) {
+        var current = stack[0];
+        if (current.type === 'component' && current.componentName === componentName) {
+            found.push(current);
+        }
+
+        stack.shift();
+        if (current.contentItems !== undefined)
+            stack = stack.concat(current.contentItems);
+    }
+
+    return found;
+}
+
 export default {
     init: init,
     getLayout: getLayout,
     getDefaultContent: getDefaultContent,
+    findFirstComponent: findFirstComponent,
+    findAllComponents: findAllComponents,
+    resetLayout: resetLayout,
 };
+
+ipcRenderer.on('view.reset-layout', function () {
+    resetLayout();
+});
