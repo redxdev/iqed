@@ -5,7 +5,7 @@
 
 import path from 'path';
 import url from 'url';
-import { app, Menu } from 'electron';
+import { app, Menu, shell } from 'electron';
 import { fileMenuTemplate } from './menu/file_menu_template';
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
@@ -55,6 +55,11 @@ app.on('ready', function () {
     if (env.name === 'development') {
         mainWindow.openDevTools();
     }
+
+    mainWindow.webContents.on('new-window', function (event, url) {
+        event.preventDefault();
+        shell.openExternal(url);
+    });
 });
 
 app.on('window-all-closed', function () {
