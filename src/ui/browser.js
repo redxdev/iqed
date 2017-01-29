@@ -143,8 +143,10 @@ export function openBrowser(layout, path) {
         });
     }
     else {
-        if (path === undefined)
+        if (path === undefined) {
+            container.tab.header.setActiveContentItem(container);
             return;
+        }
 
         container.parent.replaceChild(container, {
             type: 'component',
