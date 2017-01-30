@@ -144,7 +144,7 @@ export function openBrowser(layout, path) {
     }
     else {
         if (path === undefined) {
-            container.tab.header.setActiveContentItem(container);
+            container.parent.setActiveContentItem(container);
             return;
         }
 

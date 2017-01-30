@@ -50,7 +50,7 @@ export default function (container, componentState) {
 
     this.editor.layout();
     container.on('resize', () => {
-        this.editor.layout();
+        this.editor.layout({width: container.width, height: container.height});
     });
 
     if (componentState.filename !== undefined) {
@@ -89,7 +89,7 @@ export function openEditor(layout, path) {
     for (var i = 0; i < editors.length; ++i) {
         var editor = editors[i];
         if (editor.instance._filename !== null && path !== undefined && jetpack.path(editor.instance._filename) === jetpack.path(path)) {
-            editor.tab.header.setActiveContentItem(editor);
+            editor.parent.setActiveContentItem(editor);
             return;
         }
     }
