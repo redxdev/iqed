@@ -42,6 +42,12 @@ export var fileMenuTemplate = {
             getMainWindow().webContents.send('file.open-directory', dir);
         }
     }, {
+        label: 'Save All',
+        accelerator: 'CmdOrCtrl+Shift+S',
+        click: function () {
+            getMainWindow().webContents.send('file.save-all');
+        }
+    }, {
         type: 'separator'
     }, {
         label: 'Developer',

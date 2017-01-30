@@ -134,3 +134,10 @@ ipcRenderer.on('file.new', function () {
 ipcRenderer.on('file.open-file', function (emitter, filename) {
     openEditor(getLayout(), filename);
 });
+
+ipcRenderer.on('file.save-all', function () {
+    var editors = findAllComponents(getLayout(), 'codeEditor');
+    editors.forEach(function (editor) {
+        editor.instance._editor.getAction('save-file').run(editor.instance._editor);
+    });
+});

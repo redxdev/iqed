@@ -10,6 +10,7 @@ import { fileMenuTemplate } from './menu/file_menu_template';
 import { devMenuTemplate } from './menu/dev_menu_template';
 import { editMenuTemplate } from './menu/edit_menu_template';
 import { viewMenuTemplate } from './menu/view_menu_template';
+import { scriptMenuTemplate } from './menu/script_menu_template';
 import createWindow from './helpers/window';
 
 // Special module holding environment variables which you declared
@@ -23,7 +24,7 @@ export function getMainWindow() {
 }
 
 var setApplicationMenu = function () {
-    var menus = [fileMenuTemplate, editMenuTemplate, viewMenuTemplate];
+    var menus = [fileMenuTemplate, editMenuTemplate, viewMenuTemplate, scriptMenuTemplate];
     if (env.name !== 'production') {
         menus.push(devMenuTemplate);
     }

@@ -17,6 +17,12 @@ let consoleImpl = {
     },
     getComponent: function () {
         return currentInst;
+    },
+    clear: function () {
+        consoleBuffer = '';
+        if (currentInst !== null) {
+            currentInst._editor.setValue(consoleBuffer);
+        }
     }
 }
 
@@ -71,3 +77,7 @@ export function openConsole(layout) {
 ipcRenderer.on('view.console.show', function () {
     openConsole(getLayout());
 })
+
+ipcRenderer.on('script.clear-console', function () {
+    getConsole().clear();
+});
