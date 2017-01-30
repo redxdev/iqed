@@ -1,14 +1,16 @@
 import jetpack from 'fs-jetpack';
 import {ipcRenderer} from 'electron';
 import {findAllComponents, getLayout} from '../ui';
+import {executeString} from '../helpers/imqexec';
+
 const remote = require('electron').remote;
 
 export default function (container, componentState) {
-    this.editor = monaco.editor.create(container.getElement().get(0), {
+    this._editor = monaco.editor.create(container.getElement().get(0), {
         theme: 'vs-dark'
     });
 
-    this.editor.addAction({
+    this._editor.addAction({
         id: 'close-editor',
         label: 'Close Editor',
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_W],
@@ -18,19 +20,19 @@ export default function (container, componentState) {
         }
     });
 
-    this.editor.addAction({
+    this._editor.addAction({
         id: 'save-file',
         label: 'Save File',
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
         run: (ed) => {
             if (this._filename === null)
-                return this.editor.getAction('save-file-as').run(ed);
+                return this._editor.getAction('save-file-as').run(ed);
 
-            return jetpack.writeAsync(this._filename, this.editor.getValue());
+            return jetpack.writeAsync(this._filename, this._editor.getValue());
         }
     });
 
-    this.editor.addAction({
+    this._editor.addAction({
         id: 'save-file-as',
         label: 'Save File As',
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_S],
@@ -44,32 +46,46 @@ export default function (container, componentState) {
             var tabName = this._filename.replace(/^.*[\\\/]/, '');
             container.tab.setTitle(tabName);
 
-            return jetpack.writeAsync(this._filename, this.editor.getValue());
+            return jetpack.writeAsync(this._filename, this._editor.getValue());
         }
     });
 
-    this.editor.layout();
+    this._editor.addAction({
+        id: 'execute',
+        label: 'Execute Script',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_E],
+        run: () => {
+            var fileName = this._filename === null ? 'New File' : this._filename.replace(/^.*[\\\/]/, '');
+            return new monaco.Promise((resolve, reject) => {
+                executeString(fileName, this._editor.getValue())
+                    .then(() => {resolve();})
+                    .catch((err) => {reject(err.getString());});
+            });
+        }
+    })
+
+    this._editor.layout();
     container.on('resize', () => {
-        this.editor.layout({width: container.width, height: container.height});
+        this._editor.layout({width: container.width, height: container.height});
     });
 
     if (componentState.filename !== undefined) {
-        this.editor.updateOptions({readOnly: true});
+        this._editor.updateOptions({readOnly: true});
 
         jetpack.existsAsync(componentState.filename)
             .then((result) => {
                 if (result !== 'file') {
-                    this.editor.updateOptions({readOnly: false});
+                    this._editor.updateOptions({readOnly: false});
                     console.warn('File "' + componentState.filename + '" does not exist or is not a file');
                 }
                 else {
                     jetpack.readAsync(componentState.filename)
                         .then((data) => {
-                            this.editor.setValue(data);
-                            this.editor.updateOptions({readOnly: false});
+                            this._editor.setValue(data);
+                            this._editor.updateOptions({readOnly: false});
                         })
                         .catch((err) => {
-                            this.editor.setValue('Unable to load "' + componentState.filename + '": ' + err);
+                            this._editor.setValue('Unable to load "' + componentState.filename + '": ' + err);
                             console.warn('Unable to load "' + componentState.filename + '"', err);
                         });
                 }

@@ -81,6 +81,10 @@ export function getProvider() {
     return 'cimq';
 }
 
+export function getCopyright() {
+    return 'Copyright (c) 2017 Sam Bloomberg'
+}
+
 export class QValue {
     constructor(raw) {
         if (raw.isNull())
@@ -132,7 +136,7 @@ export class QValue {
         var result = obj.getString();
 
         if (result == null)
-            return "???";
+            return "<???>";
         
         return result;
     }
@@ -272,15 +276,12 @@ export class VMachine {
         var result = ref.alloc(cQValuePtr);
         lib.imqExecuteString.async(this.raw, data, result, function (err, success) {
             if (err) {
-                cb({
-                    success: false,
-                    result: err
-                });
+                throw err;
             }
             else {
                 cb({
                     success: success,
-                    result: result
+                    result: new QValue(result.deref())
                 });
             }
         });
@@ -301,6 +302,7 @@ export default {
     CollectionMode: CollectionMode,
     getVersion: getVersion,
     getProvider: getProvider,
+    getCopyright: getCopyright,
     QValue: QValue,
     VMachine: VMachine,
 }

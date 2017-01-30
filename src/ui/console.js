@@ -1,18 +1,27 @@
 import {ipcRenderer} from 'electron';
 import {findFirstComponent, getLayout} from '../ui';
 
+var consoleBuffer = '';
 var currentInst = null;
 
-export function getConsole() {
-    // todo: store console data in a buffer
-    if (currentInst === null)
-        return {
-            append: function () {},
-            print: function () {},
-            clear: function () {}
-        };
+let consoleImpl = {
+    append: function (data) {
+        consoleBuffer = consoleBuffer + data;
+        if (currentInst !== null) {
+            currentInst._editor.setValue(consoleBuffer);
+            currentInst._editor.revealLine(currentInst._editor.getModel().getLineCount());
+        }
+    },
+    print: function (data) {
+        consoleImpl.append(data + '\n');
+    },
+    getComponent: function () {
+        return currentInst;
+    }
+}
 
-    return currentInst;
+export function getConsole() {
+    return consoleImpl;
 }
 
 export default function (container, componentState) {
@@ -25,15 +34,6 @@ export default function (container, componentState) {
         readOnly: true,
         lineNumbers: false,
     });
-
-    this._editor.addAction({
-        id: 'clear-console',
-        label: 'Clear Console',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KEY_C],
-        run: () => {
-            this.clear();
-        }
-    })
 
     this._editor.layout();
     container.on('resize', () => {
@@ -48,32 +48,7 @@ export default function (container, componentState) {
         currentInst = null;
     });
 
-    this.append = (data) => {
-        var shouldScroll = true;
-        /*
-        if (this._editor.getSelections().length > 1)
-            shouldScroll = false;
-        else {
-            var selection = this._editor.getSelection();
-            if (!selection.getStartPosition().equals(selection.getEndPosition()) ||
-                !this._editor.getPosition().equals())
-                shouldScroll = false;
-        }
-        */
-
-        this._editor.setValue(this._editor.getValue() + data);
-        if (shouldScroll) {
-            this._editor.revealLine(this._editor.getModel().getLineCount());
-        }
-    }
-
-    this.print = (data) => {
-        this.append(data + '\n');
-    }
-
-    this.clear = () => {
-        this._editor.setValue('');
-    }
+    this._editor.setValue(consoleBuffer);
 };
 
 export function openConsole(layout) {
