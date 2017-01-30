@@ -7,7 +7,8 @@ const remote = require('electron').remote;
 
 export default function (container, componentState) {
     this._editor = monaco.editor.create(container.getElement().get(0), {
-        theme: 'vs-dark'
+        theme: 'vs-dark',
+        language: 'imquery'
     });
 
     this._editor.addAction({

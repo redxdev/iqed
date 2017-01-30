@@ -3,6 +3,7 @@ import chokidar from 'chokidar';
 import {openEditor} from './code-editor';
 import {ipcRenderer} from 'electron';
 import {getLayout, findFirstComponent} from '../ui';
+import settings from '../settings';
 
 function getFiles(tree, path, cb) {
     jetpack.listAsync(path)
@@ -45,11 +46,12 @@ function buildPathFromNode(tree, root, obj) {
 export default function (container, componentState) {
     container.getElement().addClass('allow-scroll');
 
-    var path = jetpack.cwd();
+    var path = settings.getSettings().workingDirectory;
     if (componentState.path !== undefined) {
         path = componentState.path;
     }
     this._path = path;
+    settings.getSettings().workingDirectory = this._path;
 
     container.on('tab', function (tab) {
         tab.setTitle('Browser');

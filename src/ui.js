@@ -2,6 +2,8 @@ import GoldenLayout from 'golden-layout';
 import $ from 'jquery';
 import {ipcRenderer} from 'electron';
 
+import settings from './settings';
+
 import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
 import consoleUI from './ui/console';
@@ -39,7 +41,7 @@ export function init(content) {
     }
 
     if (content === undefined) {
-        content = getDefaultContent();
+        content = settings.getSettings().layout;
     }
 
     layout = new GoldenLayout({
