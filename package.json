@@ -1,12 +1,16 @@
 {
   "name": "iqed",
-  "productName": "imquery editor",
+  "productName": "iqed",
   "description": "Editor for imquery",
   "version": "0.1.0",
   "author": "Sam Bloomberg <sam@redxdev.com>",
   "copyright": "© 2017, Sam Bloomberg.",
   "homepage": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redxdev/iqed"
+  },
   "main": "app/background.js",
   "build": {
     "appId": "com.redxdev.imquery.editor",
