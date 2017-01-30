@@ -1,5 +1,6 @@
 import imq from '../imq';
 import {getConsole} from '../ui/console';
+import {findFirstComponent, getLayout} from '../ui';
 
 window.imq = imq;
 
@@ -9,6 +10,11 @@ export function executeString(name, str) {
         getConsole().print('Executing "' + name + '"...');
 
         var vm = new imq.VMachine();
+
+        var browser = findFirstComponent(getLayout(), 'browser');
+        var dir = browser.instance._path;
+        vm.setWorkingDirectory(dir);
+
         vm.registerStandardLibrary();
         vm.executeAsync(str, function (result) {
             if (result.success) {

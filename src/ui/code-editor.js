@@ -36,7 +36,7 @@ export default function (container, componentState) {
     this._editor.addAction({
         id: 'save-file-as',
         label: 'Save File As',
-        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KEY_S],
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyCode.KEY_S],
         run: () => {
             var path = remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
                 title: 'Save File As',
