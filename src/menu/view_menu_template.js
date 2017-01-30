@@ -15,5 +15,11 @@ export var viewMenuTemplate = {
         click: function () {
             getMainWindow().webContents.send('view.browser.show');
         }
+    }, {
+        label: 'Console',
+        accelerator: 'CmdOrCtrl+Shift+Y',
+        click: function () {
+            getMainWindow().webContents.send('view.console.show');
+        }
     }]
 };

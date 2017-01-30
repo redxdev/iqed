@@ -4,6 +4,7 @@ import {ipcRenderer} from 'electron';
 
 import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
+import consoleUI from './ui/console';
 
 var layout = null;
 
@@ -19,8 +20,15 @@ export function getDefaultContent() {
             componentName: 'browser',
             width: 20
         }, {
-            type: 'component',
-            componentName: 'codeEditor'
+            type: 'column',
+            content: [{
+                type: 'component',
+                componentName: 'codeEditor',
+            }, {
+                type: 'component',
+                componentName: 'console',
+                height: 30
+            }]
         }]
     }];
 }
@@ -48,6 +56,7 @@ export function init(content) {
 
     layout.registerComponent('codeEditor', codeEditor);
     layout.registerComponent('browser', browser);
+    layout.registerComponent('console', consoleUI);
 
     layout.init();
 }
