@@ -1,4 +1,4 @@
-import {dialog} from 'electron';
+import {dialog, app, BrowserWindow} from 'electron';
 import {getMainWindow} from '../background';
 
 export var fileMenuTemplate = {
@@ -40,6 +40,25 @@ export var fileMenuTemplate = {
             
             dir = dir[0];
             getMainWindow().webContents.send('file.open-directory', dir);
+        }
+    }, {
+        type: 'separator'
+    }, {
+        label: 'Developer',
+        submenu: [{
+            label: 'Toggle DevTools',
+            accelerator: 'Alt+CmdOrCtrl+I',
+            click: function () {
+                BrowserWindow.getFocusedWindow().toggleDevTools();
+            }
+        }]
+    }, {
+        type: 'separator'
+    }, {
+        label: 'Quit',
+        accelerator: 'CmdOrCtrl+Q',
+        click: function () {
+            app.quit();
         }
     }]
 }
