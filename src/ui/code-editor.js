@@ -16,7 +16,13 @@ export default function (container, componentState) {
         label: 'Close Editor',
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_W],
         run: () => {
+            var editors = findAllComponents(getLayout(), 'codeEditor');
+            if (editors.length == 1) {
+                openEditor(getLayout());
+            }
+
             container.parent.remove();
+
             return null;
         }
     });
@@ -65,9 +71,14 @@ export default function (container, componentState) {
         }
     })
 
-    this._editor.layout();
+    container.on('open', () => {
+        this._editor.layout({width: container.width, height: container.height});
+    });
     container.on('resize', () => {
         this._editor.layout({width: container.width, height: container.height});
+    });
+    container.on('show', () => {
+        this._editor.focus();
     });
 
     if (componentState.filename !== undefined) {

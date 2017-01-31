@@ -47,7 +47,7 @@ var lib = ffi.Library('cimq', {
     'imqNewVMachine': [cVMachinePtr, []],
     'imqDestroyVMachine': [ref.types.void, [cVMachinePtr]],
 
-    'imqSetWorkingDirectory': [ref.types.void, [cVMachinePtr, ref.types.CString]],
+    'imqSetWorkingDirectory': [ref.types.bool, [cVMachinePtr, ref.types.CString]],
 
     'imqGCSetDebugMode': [ref.types.void, [cVMachinePtr, ref.types.bool]],
     'imqGCGetCollectionMode': [ref.types.int, [cVMachinePtr]],
@@ -235,7 +235,7 @@ export class VMachine {
     }
 
     setWorkingDirectory(path) {
-        lib.imqSetWorkingDirectory(this.raw, path);
+        return lib.imqSetWorkingDirectory(this.raw, path);
     }
 
     setGCDebugMode(mode) {

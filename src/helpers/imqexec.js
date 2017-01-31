@@ -13,9 +13,20 @@ export function executeString(name, str) {
 
         var browser = findFirstComponent(getLayout(), 'browser');
         var dir = browser.instance._path;
-        vm.setWorkingDirectory(dir);
+        var r = vm.setWorkingDirectory(dir);
+        if (r === false) {
+            getConsole().print('error: unable to set vm working directory to ' + dir);
+            reject('unable to set vm working directory to ' + dir);
+            return;
+        }
 
-        vm.registerStandardLibrary();
+        var r = vm.registerStandardLibrary();
+        if (r.success === false) {
+            getConsole().print('error: ' + r.result.toString().getString());
+            reject(result.result);
+            return;
+        }
+
         vm.executeAsync(str, function (result) {
             if (result.success) {
                 getConsole().print('success: ' + result.result.asString());
