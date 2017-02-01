@@ -21,5 +21,11 @@ export var viewMenuTemplate = {
         click: function () {
             getMainWindow().webContents.send('view.console.show');
         }
+    }, {
+        label: 'Inputs',
+        accelerator: 'CmdOrCtrl+Shift+I',
+        click: function () {
+            getMainWindow().webContents.send('view.input-editor.show');
+        }
     }]
 };

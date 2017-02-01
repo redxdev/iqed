@@ -18,7 +18,12 @@ else {
 export function getDefaultSettings() {
     return {
         layout: getDefaultContent(),
-        workingDirectory: jetpack.cwd()
+        workingDirectory: jetpack.cwd(),
+        inputs: [{
+            name: 'test_input',
+            type: 'string',
+            value: 'Hello World!'
+        }]
     };
 }
 

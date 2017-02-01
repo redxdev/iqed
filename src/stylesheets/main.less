@@ -1,15 +1,3 @@
-// VARIABLES
-@sidebar-width: 200px;
-@sidebar-bg-color: #ccc;
-
-@editor-bg-color: white;
-@editor-border-color: #444;
-
-@footer-bg-color: #eee;
-@footer-border-color: @editor-border-color;
-@footer-height: 30px;
-@footer-font-size: 0.9em;
-
 // STYLES
 
 html, body {
@@ -30,5 +18,50 @@ html, body {
     > img {
         width: auto;
         height: auto;
+    }
+}
+
+.input-editor {
+    width: 100%;
+    height: 100%;
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table, td, th {
+        border: 0px;
+    }
+
+    thead {
+        width: 100%;
+
+        color: white;
+        background-color: #4CAF50;
+    }
+
+    tbody {
+        width: 100%;
+
+        p {
+            color: white;
+        }
+
+        .input-value {
+            width: auto;
+        }
+    }
+
+    button.input-add {
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    button.input-delete {
+        background-color: #AF4C50;
+        color: white;
+        cursor: pointer;
     }
 }

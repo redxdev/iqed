@@ -8,6 +8,7 @@ import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
 import consoleUI from './ui/console';
 import imageViewer from './ui/image-viewer';
+import inputEditor from './ui/input-editor';
 
 var layout = null;
 
@@ -27,10 +28,16 @@ export function getDefaultContent() {
             content: [{
                 type: 'component',
                 componentName: 'codeEditor',
-            }, {
-                type: 'component',
-                componentName: 'console',
-                height: 30
+            },{
+                type: 'row',
+                content: [{
+                    type: 'component',
+                    componentName: 'console',
+                    width: 70
+                }, {
+                    type: 'component',
+                    componentName: 'inputEditor'
+                }]
             }]
         }]
     }];
@@ -56,6 +63,7 @@ export function init(content) {
     layout.registerComponent('browser', browser);
     layout.registerComponent('console', consoleUI);
     layout.registerComponent('imageViewer', imageViewer);
+    layout.registerComponent('inputEditor', inputEditor);
 
     layout.init();
 }
