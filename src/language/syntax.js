@@ -28,7 +28,7 @@ export default {
             [/[a-zA-Z_][0-9a-zA-Z_]*/, {cases: {
                 '@valueKeywords': 'keyword',
                 '@keywords': 'keyword',
-                '@wordOperators': 'operator',
+                '@wordOperators': 'keyword',
                 '@default': 'identifier'
             }}],
 
