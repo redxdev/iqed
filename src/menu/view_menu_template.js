@@ -22,10 +22,10 @@ export var viewMenuTemplate = {
             getMainWindow().webContents.send('view.console.show');
         }
     }, {
-        label: 'Inputs',
+        label: 'IO Editor',
         accelerator: 'CmdOrCtrl+Shift+I',
         click: function () {
-            getMainWindow().webContents.send('view.input-editor.show');
+            getMainWindow().webContents.send('view.io-editor.show');
         }
     }]
 };

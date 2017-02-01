@@ -9,6 +9,8 @@ import {getConsole} from './ui/console';
 
 require('devtron').install();
 
+window.settings = settings;
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("imq version " + imq.getVersion() + " provided via " + imq.getProvider());
 });

@@ -65,7 +65,11 @@ var lib = ffi.Library('cimq', {
     'imqRegisterStandardLibrary': [ref.types.bool, [cVMachinePtr, ref.refType(cQValuePtr)]],
 
     'imqSetInput': [ref.types.void, [cVMachinePtr, ref.types.CString, cQValuePtr]],
-    'imqGetInput': [cQObjectPtr, [cVMachinePtr, ref.types.CString]],
+    'imqGetInput': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
+    'imqGetOutput': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
+
+    'imqLoadImageFromFile': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
+    'imqSaveImageToFile': [ref.types.bool, [cQValuePtr, ref.types.CString]],
 });
 
 export var type = {
@@ -323,6 +327,26 @@ export class VMachine {
 
         return new QValue(result);
     }
+
+    getOutput(key) {
+        var result = lib.imqGetOutput(this.raw, key);
+        if (result.isNull())
+            return null;
+
+        return new QValue(result);
+    }
+}
+
+export function loadQImageFromFile(vm, path) {
+    var result = lib.imqLoadImageFromFile(vm.raw, path);
+    if (result.isNull())
+        return null;
+
+    return new QValue(result);
+}
+
+export function saveQImageToFile(value, path) {
+    return lib.imqSaveImageToFile(value.raw, path);
 }
 
 export default {
@@ -333,4 +357,6 @@ export default {
     getCopyright: getCopyright,
     QValue: QValue,
     VMachine: VMachine,
+    loadQImageFromFile: loadQImageFromFile,
+    saveQImageToFile: saveQImageToFile,
 }

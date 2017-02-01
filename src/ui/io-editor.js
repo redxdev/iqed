@@ -2,10 +2,12 @@ import {ipcRenderer} from 'electron';
 import {findFirstComponent, getLayout} from '../ui';
 import settings from '../settings';
 
-var model = settings.getSettings().inputs;
+const {dialog, BrowserWindow} = require('electron').remote;
+
+var model = settings.getSettings().io;
 if (!model) {
-    model = settings.getDefaultSettings().inputs;
-    settings.getSettings().inputs = model;
+    model = settings.getDefaultSettings().io;
+    settings.getSettings().io = model;
 }
 
 function createOption(parent, name, value, select) {
@@ -27,7 +29,6 @@ function createValueInput(type, input) {
 
     case 'bool':
         el = document.createElement('select');
-        el.className = 'input-value';
         createOption(el, 'false', 'false', input.value);
         createOption(el, 'true', 'true', input.value);
         el.onchange = (ev) => {
@@ -65,11 +66,52 @@ function createValueInput(type, input) {
 
     case 'image':
         el = document.createElement('p');
-        el.innerText = 'Not Supported';
+        var p = document.createElement('a');
+        p.className = 'io-file-value';
+        p.innerText = 'File: ' + input.value.replace(/^.*[\\\/]/, '');
+        p.onclick = (ev) => {
+            var file = dialog.showOpenDialog(BrowserWindow.getFocusedWindow(), {
+                filters: [{name: 'Images', extensions: ['jpg', 'png', 'gif', 'jpeg', 'tga']}, {name: 'All Files', extensions: ['*']}],
+                properties: ['openFile'],
+                defaultPath: input.value
+            });
+
+            if (!file || file.length < 1)
+                return;
+
+            input.value = file[0];
+            ev.target.innerText = 'File: ' + input.value.replace(/^.*[\\\/]/, '');
+        };
+        el.appendChild(p);
+        break;
+
+    case 'image-output':
+        el = document.createElement('p');
+        var p = document.createElement('a');
+        p.className = 'io-file-value';
+        p.innerText = 'File: ' + input.value.replace(/^.*[\\\/]/, '');
+        p.onclick = (ev) => {
+            var file = dialog.showSaveDialog(BrowserWindow.getFocusedWindow(), {
+                filters: [{name: 'PNG Image', extensions: ['png']}, {name: 'All Files', extensions: ['*']}],
+                defaultPath: input.value
+            });
+
+            if (!file)
+                return;
+
+            input.value = file;
+            ev.target.innerText = 'File: ' + input.value.replace(/^.*[\\\/]/, '');
+        };
+        el.appendChild(p);
+        break;
+
+    default:
+        el = document.createElement('p');
+        el.innerText = 'Unsupported Type';
         break;
     }
 
-    el.className = 'input-value';
+    el.className = 'io-value';
 
     return el;
 }
@@ -82,7 +124,7 @@ function createRow(input) {
 
     var nameInput = document.createElement('input');
     nameInput.setAttribute('type', 'text');
-    nameInput.className = 'input-name';
+    nameInput.className = 'io-name';
     nameInput.value = input.name;
     nameInput.onchange = (ev) => {
         input.name = ev.target.value;
@@ -93,7 +135,7 @@ function createRow(input) {
     row.appendChild(typeCol);
 
     var typeInput = document.createElement('select');
-    typeInput.className = 'input-type';
+    typeInput.className = 'io-type';
     typeInput.onchange = (ev) => {
         input.type = ev.target.value;
         var newRow = createRow(input);
@@ -107,6 +149,7 @@ function createRow(input) {
     createOption(typeInput, 'Float', 'float', input.type);
     createOption(typeInput, 'String', 'string', input.type);
     createOption(typeInput, 'Image', 'image', input.type);
+    createOption(typeInput, 'Image Output', 'image-output', input.type);
 
     var valueCol = document.createElement('td');
     row.appendChild(valueCol);
@@ -117,7 +160,7 @@ function createRow(input) {
     row.appendChild(deleteCol);
 
     var deleteButton = document.createElement('button');
-    deleteButton.className = 'input-delete';
+    deleteButton.className = 'io-delete';
     deleteButton.innerText = '-';
     deleteButton.onclick = () => {
         var idx = model.indexOf(input);
@@ -156,7 +199,7 @@ function updateFromModel(table) {
     lastRow.appendChild(addCol);
 
     var addButton = document.createElement('button');
-    addButton.className = 'input-add';
+    addButton.className = 'io-add';
     addButton.innerText = '+';
     addButton.onclick = () => {
         var input = {name: '', type: 'nil', value: ''};
@@ -168,7 +211,7 @@ function updateFromModel(table) {
 
 export default function (container, componentState) {
     var root = document.createElement('div');
-    root.className = 'input-editor allow-scroll';
+    root.className = 'io-editor allow-scroll';
 
     this._table = document.createElement('table');
     root.appendChild(this._table);
@@ -178,16 +221,16 @@ export default function (container, componentState) {
     updateFromModel(this._table);
 
     container.on('tab', (tab) => {
-        tab.setTitle('Inputs');
+        tab.setTitle('IO Editor');
     });
 }
 
-export function getInputs() {
+export function getModel() {
     return model;
 }
 
-function openInputEditor(layout) {
-    var container = findFirstComponent(layout, 'inputEditor');
+function openIOEditor(layout) {
+    var container = findFirstComponent(layout, 'ioEditor');
     if (container === null) {
         container = layout.root;
         if (container.contentItems.length > 0)
@@ -195,7 +238,7 @@ function openInputEditor(layout) {
 
         container.addChild({
             type: 'component',
-            componentName: 'inputEditor'
+            componentName: 'ioEditor'
         });
     }
     else {
@@ -203,6 +246,6 @@ function openInputEditor(layout) {
     }
 }
 
-ipcRenderer.on('view.input-editor.show', function () {
-    openInputEditor(getLayout());
+ipcRenderer.on('view.io-editor.show', function () {
+    openIOEditor(getLayout());
 });

@@ -19,11 +19,7 @@ export function getDefaultSettings() {
     return {
         layout: getDefaultContent(),
         workingDirectory: jetpack.cwd(),
-        inputs: [{
-            name: 'test_input',
-            type: 'string',
-            value: 'Hello World!'
-        }]
+        io: []
     };
 }
 
@@ -40,9 +36,14 @@ export function saveSettingsAsync() {
     return userDataDir.writeAsync(settingsStoreFile, currentSettings);
 }
 
+export function resetSettings() {
+    currentSettings = getDefaultSettings();
+}
+
 export default {
     getDefaultSettings: getDefaultSettings,
     getSettings: getSettings,
     saveSettings: saveSettings,
-    saveSettingsAsync: saveSettingsAsync
+    saveSettingsAsync: saveSettingsAsync,
+    resetSettings: resetSettings,
 };

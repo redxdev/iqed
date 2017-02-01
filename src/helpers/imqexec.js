@@ -2,33 +2,37 @@ import imq from '../imq';
 import {getConsole} from '../ui/console';
 import {findFirstComponent, getLayout} from '../ui';
 
-export function buildQValueFromInput(input) {
+export function buildQValueFromInput(vm, input) {
     let QValue = imq.QValue;
-
-    console.log(input);
 
     switch (input.type) {
     case 'nil':
-        return QValue.Nil();
+        return {type: 'input', value: QValue.Nil()};
 
     case 'bool':
-        return QValue.Bool(Boolean(input.value));
+        return {type: 'input', value: QValue.Bool(Boolean(input.value))};
 
     case 'integer':
-        return QValue.Integer(parseInt(input.value));
+        return {type: 'input', value: QValue.Integer(parseInt(input.value))};
 
     case 'float':
-        return QValue.Float(parseFloat(input.value));
+        return {type: 'input', value: QValue.Float(parseFloat(input.value))};
 
     case 'string':
-        return QValue.String(input.value);
+        return {type: 'input', value: QValue.String(input.value)};
+
+    case 'image':
+        return {type: 'input', value: imq.loadQImageFromFile(vm, input.value)};
+
+    case 'image-output':
+        return {type: 'output', value: input.value};
 
     default:
         return null;
     }
 }
 
-export function executeString(name, str, inputs) {
+export function executeString(name, str, ioModel) {
     return new Promise(function (resolve, reject) {
         console.log('Executing "' + name + '"');
         getConsole().print('Executing "' + name + '"...');
@@ -51,27 +55,77 @@ export function executeString(name, str, inputs) {
             return;
         }
 
-        if (inputs !== undefined) {
+        var outputs = {};
+
+        if (ioModel !== undefined) {
             var inputSet = {};
-            for (var i = 0; i < inputs.length; ++i) {
-                var input = inputs[i];
-                if (inputSet[input.name] === true) {
-                    getConsole().print('warning: input "' + input.name + '" is a duplicate');
-                }
-                inputSet[input.name] = true;
-                var value = buildQValueFromInput(input);
+            for (var i = 0; i < ioModel.length; ++i) {
+                var input = ioModel[i];
+                var value = buildQValueFromInput(vm, input);
                 if (value === null) {
-                    getConsole().print('warning: input "' + input.name + '" has invalid type "' + input.type + '"');
+                    getConsole().print('warning: io "' + input.name + '" has invalid type "' + input.type + '"');
                     continue;
                 }
 
-                vm.setInput(input.name, value);
+                if (value.value === null) {
+                    getConsole().print('warning: io ' + value.type + ' "' + input.name + '" has an invalid value');
+                    continue;
+                }
+
+                switch (value.type)
+                {
+                case 'input':
+                    if (inputSet[input.name] === true) {
+                        getConsole().print('warning: io input "' + input.name + '" is a duplicate');
+                    }
+
+                    inputSet[input.name] = true;
+                    vm.setInput(input.name, value.value);
+                    break;
+
+                case 'output':
+                    if (outputs[input.name]) {
+                        getConsole().print('warning: io output "' + input.name + '" is a duplicate');
+                    }
+
+                    outputs[input.name] = value.value;
+                    break;
+
+                default:
+                    getConsole().print('warning: buildQValueFromInput returned unknown type "' + value.type + '"');
+                    break;
+                }
             }
         }
 
         vm.executeAsync(str, function (result) {
             if (result.success) {
                 getConsole().print('success: ' + result.result.asString());
+
+                var printLast = false;
+                for (var k in outputs) {
+                    if (!outputs.hasOwnProperty(k))
+                        continue;
+
+                    printLast = false;
+                    var value = vm.getOutput(k);
+                    if (!value) {
+                        getConsole().print('warning: output "' + k + '" not found');
+                        continue;
+                    }
+
+                    getConsole().print('Saving output "' + k + '" to "' + outputs[k] + '"...');
+                    if (!imq.saveQImageToFile(value, outputs[k])) {
+                        getConsole().print('Failed.');
+                    }
+                    else {
+                        printLast = true;
+                    }
+                }
+
+                if (printLast)
+                    getConsole().print('Finished.');
+
                 resolve(result.result);
             }
             else {

@@ -3,7 +3,7 @@ import {ipcRenderer} from 'electron';
 import {findAllComponents, getLayout} from '../ui';
 import {executeString} from '../helpers/imqexec';
 import {getLanguageFromPath} from '../helpers/filetype';
-import {getInputs} from './input-editor';
+import {getModel} from './io-editor';
 
 const remote = require('electron').remote;
 
@@ -76,9 +76,14 @@ export default function (container, componentState) {
         run: () => {
             var fileName = this._filename === null ? 'New File' : this._filename.replace(/^.*[\\\/]/, '');
             return new monaco.Promise((resolve, reject) => {
-                executeString(fileName, this._editor.getValue(), getInputs())
+                executeString(fileName, this._editor.getValue(), getModel())
                     .then(() => {resolve();})
-                    .catch((err) => {reject(err.getString());});
+                    .catch((err) => {
+                        if (err.getString)
+                            reject(err.getString());
+                        else
+                            reject(err);
+                    });
             });
         }
     })

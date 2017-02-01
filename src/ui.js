@@ -8,7 +8,7 @@ import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
 import consoleUI from './ui/console';
 import imageViewer from './ui/image-viewer';
-import inputEditor from './ui/input-editor';
+import ioEditor from './ui/io-editor';
 
 var layout = null;
 
@@ -36,7 +36,7 @@ export function getDefaultContent() {
                     width: 70
                 }, {
                     type: 'component',
-                    componentName: 'inputEditor'
+                    componentName: 'ioEditor'
                 }]
             }]
         }]
@@ -63,7 +63,7 @@ export function init(content) {
     layout.registerComponent('browser', browser);
     layout.registerComponent('console', consoleUI);
     layout.registerComponent('imageViewer', imageViewer);
-    layout.registerComponent('inputEditor', inputEditor);
+    layout.registerComponent('ioEditor', ioEditor);
 
     layout.init();
 }
