@@ -3,6 +3,7 @@ import chokidar from 'chokidar';
 import {openEditor} from './code-editor';
 import {ipcRenderer} from 'electron';
 import {getLayout, findFirstComponent} from '../ui';
+import {openEditorForPath} from '../helpers/filetype';
 import settings from '../settings';
 
 function getFiles(tree, path, cb) {
@@ -115,7 +116,7 @@ export default function (container, componentState) {
             return;
 
         var filePath = buildPathFromNode(instance, path, node);
-        openEditor(container.layoutManager, filePath);
+        openEditorForPath(filePath);
     });
 
     // TODO: This is a really inefficient way to deal with filesystem changes, especially on large directory trees.

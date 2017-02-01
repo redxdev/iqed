@@ -2,13 +2,16 @@ import jetpack from 'fs-jetpack';
 import {ipcRenderer} from 'electron';
 import {findAllComponents, getLayout} from '../ui';
 import {executeString} from '../helpers/imqexec';
+import {getLanguageFromPath} from '../helpers/filetype';
 
 const remote = require('electron').remote;
 
 export default function (container, componentState) {
+    var language = componentState.language === undefined && componentState.filename !== undefined ? getLanguageFromPath(componentState.filename) : undefined;
+
     this._editor = monaco.editor.create(container.getElement().get(0), {
         theme: 'vs-dark',
-        language: 'imquery'
+        language: language
     });
 
     this._editor.addAction({
@@ -49,11 +52,19 @@ export default function (container, componentState) {
                 defaultPath: this._filename === null ? undefined : this._filename
             });
 
+            if (path === undefined)
+                return null;
+
             this._filename = path;
             var tabName = this._filename.replace(/^.*[\\\/]/, '');
             container.tab.setTitle(tabName);
 
-            return jetpack.writeAsync(this._filename, this._editor.getValue());
+            return jetpack.writeAsync(this._filename, this._editor.getValue()).then(() => {
+                monaco.editor.setModelLanguage(this._editor.getModel(), getLanguageFromPath(this._filename));
+            }).catch((err) => {
+                alert('Unable to save file ' + this._filename);
+                console.error('Unable to save file ' + this._filename, err);
+            });
         }
     });
 
