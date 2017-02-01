@@ -7,6 +7,7 @@ import settings from './settings';
 import codeEditor from './ui/code-editor';
 import browser from './ui/browser';
 import consoleUI from './ui/console';
+import imageViewer from './ui/image-viewer';
 
 var layout = null;
 
@@ -51,14 +52,10 @@ export function init(content) {
         }
     });
 
-    // TODO: remove
-    layout.registerComponent('testComponent', function (container, componentState) {
-        container.getElement().html('<h2>' + componentState.label + '</h2>');
-    });
-
     layout.registerComponent('codeEditor', codeEditor);
     layout.registerComponent('browser', browser);
     layout.registerComponent('console', consoleUI);
+    layout.registerComponent('imageViewer', imageViewer);
 
     layout.init();
 }
