@@ -82,8 +82,8 @@ describe('imq binding library', function () {
         });
 
         describe('#asString()', function () {
-            it('should return an empty string for nil', function () {
-                expect(QValue.Nil().asString()).to.equal('');
+            it('should return "nil" for nil', function () {
+                expect(QValue.Nil().asString()).to.equal('nil');
             });
 
             it('should return booleans', function () {
@@ -254,11 +254,37 @@ describe('imq binding library', function () {
             });
         });
 
+        describe('#equals()', function () {
+            it('should return true on equal values', function () {
+                expect(QValue.Nil().equals(QValue.Nil())).to.be.true;
+
+                expect(QValue.Bool(true).equals(QValue.Bool(true))).to.be.true;
+                expect(QValue.Bool(false).equals(QValue.Bool(false))).to.be.true;
+
+                expect(QValue.Integer(123).equals(QValue.Integer(123))).to.be.true;
+                expect(QValue.Integer(-456).equals(QValue.Integer(-456))).to.be.true;
+
+                expect(QValue.Float(1.54).equals(QValue.Float(1.54))).to.be.true;
+                expect(QValue.Float(-99.32).equals(QValue.Float(-99.32))).to.be.true;
+
+                expect(QValue.String('hello world').equals(QValue.String('hello world'))).to.be.true;
+            });
+
+            it('should return false on unequal values', function () {
+                expect(QValue.Nil().equals(QValue.Bool(false))).to.be.false;
+
+                expect(QValue.Bool(true).equals(QValue.Bool(false))).to.be.false;
+                expect(QValue.Bool(false).equals(QValue.Bool(true))).to.be.false;
+                expect(QValue.Bool(true).equals(QValue.Integer(1))).to.be.false;
+            });
+        });
+
     });
 
     describe('.VMachine', function () {
 
         let VMachine = imq.VMachine;
+        let QValue = imq.QValue;
         let CollectionMode = imq.CollectionMode;
 
         describe('#getGCCollectionMode()', function () {
@@ -374,6 +400,34 @@ describe('imq binding library', function () {
                 var result = vm.execute("clamp(10, 1, 5);");
                 expect(result.success).to.be.true;
                 expect(result.result.getInteger()).to.equal(5);
+            });
+        });
+
+        describe('#setInput()', function () {
+            it('should set inputs', function () {
+                let vm = new VMachine();
+                
+                vm.setInput('foo', QValue.String('bar'));
+                var val = vm.getInput('foo');
+                expect(val).to.not.be.null;
+                expect(val.equals(QValue.String('bar'))).to.be.true;
+            });
+        });
+
+        describe('#getInput()', function () {
+            it('should return null on invalid inputs', function () {
+                let vm = new VMachine();
+
+                expect(vm.getInput('foo')).to.be.null;
+            });
+
+            it('should return values on valid inputs', function () {
+                let vm = new VMachine();
+
+                vm.setInput('foo', QValue.Integer(123));
+                var val = vm.getInput('foo');
+                expect(val).to.not.be.null;
+                expect(val.equals(QValue.Integer(123))).to.be.true;
             });
         });
 

@@ -1,5 +1,6 @@
 import ffi from 'ffi';
 import ref from 'ref';
+import ArrayType from 'ref-array';
 import finalize from 'finalize';
 
 let cQValue = ref.types.void;
@@ -44,6 +45,8 @@ var lib = ffi.Library('cimq', {
     'imqToFloat': [cQValuePtr, [cQValuePtr]],
     'imqToString': [cQValuePtr, [cQValuePtr]],
 
+    'imqValueEquals': [ref.types.bool, [cQValuePtr, cQValuePtr]],
+
     'imqNewVMachine': [cVMachinePtr, []],
     'imqDestroyVMachine': [ref.types.void, [cVMachinePtr]],
 
@@ -60,6 +63,9 @@ var lib = ffi.Library('cimq', {
     'imqExecuteString': [ref.types.bool, [cVMachinePtr, ref.types.CString, ref.refType(cQValuePtr)]],
 
     'imqRegisterStandardLibrary': [ref.types.bool, [cVMachinePtr, ref.refType(cQValuePtr)]],
+
+    'imqSetInput': [ref.types.void, [cVMachinePtr, ref.types.CString, cQValuePtr]],
+    'imqGetInput': [cQObjectPtr, [cVMachinePtr, ref.types.CString]],
 });
 
 export var type = {
@@ -223,6 +229,10 @@ export class QValue {
 
         return null;
     }
+
+    equals(other) {
+        return lib.imqValueEquals(this.raw, other.raw);
+    }
 }
 
 export class VMachine {
@@ -300,6 +310,18 @@ export class VMachine {
             success: success,
             result: new QValue(result.deref())
         };
+    }
+
+    setInput(key, value) {
+        lib.imqSetInput(this.raw, key, value.raw);
+    }
+
+    getInput(key) {
+        var result = lib.imqGetInput(this.raw, key);
+        if (result.isNull())
+            return null;
+
+        return new QValue(result);
     }
 }
 

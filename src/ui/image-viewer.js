@@ -37,7 +37,7 @@ export function openImageViewer(layout, path) {
     var viewers = findAllComponents(layout, 'imageViewer');
     for (var i = 0; i < viewers.length; ++i) {
         var viewer = viewers[i];
-        if (viewer.instance._filename !== null && path !== undefined) {
+        if (viewer.instance._filename !== null && path !== undefined && jetpack.path(viewer.instance._filename) == jetpack.path(path)) {
             viewer.parent.setActiveContentItem(viewer);
             return;
         }
