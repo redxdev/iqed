@@ -5,7 +5,8 @@
 iqed - the [imquery](https://github.com/redxdev/imquery) editor. Under development, but usable!
 
 iqed uses [electron](http://electron.atom.io) for UI (via [electron-boilerplate](https://github.com/szwacz/electron-boilerplate)) with ffi
-bindings to imq (via cimq).
+bindings to imq (via cimq). [GoldenLayout](https://www.golden-layout.com/) is used for layout, and
+[monaco](https://github.com/Microsoft/monaco-editor) is used for text editing.
 
 ## Requirements
 
