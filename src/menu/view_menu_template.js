@@ -11,7 +11,7 @@ export var viewMenuTemplate = {
         type: 'separator'
     }, {
         label: 'Browser',
-        accelerator: 'CmdOrCtrl+Shift+E',
+        accelerator: 'CmdOrCtrl+Shift+B',
         click: function () {
             getMainWindow().webContents.send('view.browser.show');
         }

@@ -20,7 +20,7 @@ export default function (container, componentState) {
             outer.className = 'image-viewer allow-scroll';
             
             this._img = document.createElement('img');
-            this._img.src = this._filename;
+            this._img.src = this._filename + '?' + new Date().getTime(); // hack to prevent cache from taking over
             outer.appendChild(this._img);
 
             container.getElement().append(outer);
