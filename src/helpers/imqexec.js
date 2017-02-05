@@ -1,6 +1,8 @@
 import imq from '../imq';
 import {getConsole} from '../ui/console';
-import {findFirstComponent, getLayout} from '../ui';
+import settings from '../settings';
+
+var currentlyExecuting = false;
 
 export function buildQValueFromInput(vm, input) {
     let QValue = imq.QValue;
@@ -33,14 +35,20 @@ export function buildQValueFromInput(vm, input) {
 }
 
 export function executeString(name, str, ioModel) {
+    if (currentlyExecuting) {
+        getConsole().print('Already executing a script!');
+        return;
+    }
+
     return new Promise(function (resolve, reject) {
+        currentlyExecuting = true;
+
         console.log('Executing "' + name + '"');
         getConsole().print('Executing "' + name + '"...');
 
         var vm = new imq.VMachine();
 
-        var browser = findFirstComponent(getLayout(), 'browser');
-        var dir = browser.instance._path;
+        var dir = settings.getSettings().workingDirectory;
         var r = vm.setWorkingDirectory(dir);
         if (r === false) {
             getConsole().print('error: unable to set vm working directory to ' + dir);
@@ -59,9 +67,11 @@ export function executeString(name, str, ioModel) {
 
         if (ioModel !== undefined) {
             var inputSet = {};
+            console.log('Setting inputs...');
             for (var i = 0; i < ioModel.length; ++i) {
                 var input = ioModel[i];
                 var value = buildQValueFromInput(vm, input);
+                console.log('input ' + input.name, value);
                 if (value === null) {
                     getConsole().print('warning: io "' + input.name + '" has invalid type "' + input.type + '"');
                     continue;
@@ -133,5 +143,10 @@ export function executeString(name, str, ioModel) {
                 reject(result.result);
             }
         });
+    }).then(() => {
+        currentlyExecuting = false;
+    }, () => {
+        getConsole().print('There was a problem executing the script. See the dev console for more information (Ctrl/Cmd+Shift+I)');
+        currentlyExecuting = false;
     });
 }
