@@ -23,6 +23,13 @@ export default {
 
     symbols: /[=>?!<+\-*/%:]/,
 
+    brackets: [
+        ['{', '}', 'delimeter.curly'],
+        ['[', ']', 'delimiter.square'],
+        ['(', ')', 'delimiter.parenthesis'],
+        ['<', '>', 'delimiter.angle']
+    ],
+
     tokenizer: {
         root: [
             [/[a-zA-Z_][0-9a-zA-Z_]*/, {cases: {

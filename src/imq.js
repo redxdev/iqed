@@ -148,7 +148,6 @@ export class QValue {
         var cb = ffi.Callback(cFunctionResult, [cVMachinePtr, ref.types.int, cQValuePtrArr], function (vmPtr, argCount, rawArgs) {
             rawArgs.length = argCount;
             var args = [];
-            //var args = new cQValuePtrArr(rawArgs, argCount);
             for (var i = 0; i < argCount; ++i) {
                 args.push(new QValue(rawArgs[i]));
             }
