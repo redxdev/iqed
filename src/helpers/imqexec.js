@@ -1,6 +1,7 @@
 import imq from '../imq';
 import {getConsole} from '../ui/console';
 import settings from '../settings';
+import editorlib from '../editorlib';
 
 var currentlyExecuting = false;
 
@@ -63,15 +64,20 @@ export function executeString(name, str, ioModel) {
             return;
         }
 
+        r = editorlib(vm);
+        if (!r) {
+            getConsole().print('error: unable to register editor functions into the imquery vm');
+            reject('unable to register editor functions into the imquery vm:', r);
+            return;
+        }
+
         var outputs = {};
 
         if (ioModel !== undefined) {
             var inputSet = {};
-            console.log('Setting inputs...');
             for (var i = 0; i < ioModel.length; ++i) {
                 var input = ioModel[i];
                 var value = buildQValueFromInput(vm, input);
-                console.log('input ' + input.name, value);
                 if (value === null) {
                     getConsole().print('warning: io "' + input.name + '" has invalid type "' + input.type + '"');
                     continue;
@@ -145,8 +151,9 @@ export function executeString(name, str, ioModel) {
         });
     }).then(() => {
         currentlyExecuting = false;
-    }, () => {
-        getConsole().print('There was a problem executing the script. See the dev console for more information (Ctrl/Cmd+Shift+I)');
+    }, (e) => {
+        console.log('Unable to execute:', e);
+        getConsole().print('There was a problem executing the script. See the dev console for more information (Ctrl/Cmd+Alt+I)');
         currentlyExecuting = false;
     });
 }

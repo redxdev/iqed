@@ -1,10 +1,12 @@
 import ffi from 'ffi';
 import ref from 'ref';
 import ArrayType from 'ref-array';
+import Struct from 'ref-struct';
 import finalize from 'finalize';
 
 let cQValue = ref.types.void;
 let cQValuePtr = ref.refType(cQValue);
+let cQValuePtrArr = ArrayType(cQValuePtr);
 let cQValueType = ref.types.int;
 
 let cQObject = ref.types.void;
@@ -12,6 +14,11 @@ let cQObjectPtr = ref.refType(cQObject);
 
 let cVMachine = ref.types.void;
 let cVMachinePtr = ref.refType(cVMachine);
+
+let cFunctionResult = Struct({
+    'bError': ref.types.bool,
+    'result': cQValuePtr
+});
 
 var lib = ffi.Library('cimq', {
     // platform
@@ -27,6 +34,8 @@ var lib = ffi.Library('cimq', {
     'imqFloatValue': [cQValuePtr, [ref.types.float]],
     'imqStringValue': [cQValuePtr, [ref.types.CString]],
     'imqObjectValue': [cQValuePtr, [cQObjectPtr]],
+
+    'imqCreateFunction': [cQValuePtr, [cVMachinePtr, ref.refType(ref.types.void)]],
 
     'imqGetValueType': [cQValueType, [cQValuePtr]],
     'imqGetValueTypeString': [cQValuePtr, [ref.types.int]],
@@ -68,6 +77,9 @@ var lib = ffi.Library('cimq', {
     'imqGetInput': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
     'imqGetOutput': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
 
+    'imqSetValue': [ref.types.bool, [cVMachinePtr, ref.types.CString, cQValuePtr]],
+    'imqGetValue': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
+
     'imqLoadImageFromFile': [cQValuePtr, [cVMachinePtr, ref.types.CString]],
     'imqSaveImageToFile': [ref.types.bool, [cQValuePtr, ref.types.CString]],
 });
@@ -98,11 +110,12 @@ export function getCopyright() {
 }
 
 export class QValue {
-    constructor(raw) {
+    constructor(raw, extra) {
         if (raw.isNull())
             throw new ReferenceError("Cannot construct QValue from null reference.");
 
         this.raw = raw;
+        this.extra = extra;
         finalize(this, () => {
             if (!this.raw.isNull())
                 lib.imqDestroyValue(this.raw);
@@ -127,6 +140,50 @@ export class QValue {
 
     static String(val) {
         return new QValue(lib.imqStringValue(val));
+    }
+
+    // You must keep a reference to the QValue returned by this in order to prevent garbage collection
+    // of the function.
+    static Function(vm, func) {
+        var cb = ffi.Callback(cFunctionResult, [cVMachinePtr, ref.types.int, cQValuePtrArr], function (vmPtr, argCount, rawArgs) {
+            rawArgs.length = argCount;
+            var args = [];
+            //var args = new cQValuePtrArr(rawArgs, argCount);
+            for (var i = 0; i < argCount; ++i) {
+                args.push(new QValue(rawArgs[i]));
+            }
+
+            var result = null;
+            try {
+                result = func(args);
+            }
+            catch (e) {
+                console.error('Error while calling js QFunction', e);
+                var r = new cFunctionResult();
+                r.bError = true;
+                r.result = lib.imqStringValue(e.toString());
+                return r;
+            }
+
+            var r = new cFunctionResult();
+            r.bError = false;
+            if (result === null || result === undefined) {
+                r.result = lib.imqNilValue();
+            }
+            else if (result.raw === undefined) {
+                r.bError = true;
+                var err = 'Return value from js QFunction was not a QValue';
+                r.result = lib.imqStringValue(err);
+                console.error(err);
+            }
+            else {
+                r.result = result.raw;
+            }
+
+            return r;
+        });
+
+        return new QValue(lib.imqCreateFunction(vm.raw, cb), cb);
     }
 
     static getTypeString(t) {
@@ -242,6 +299,7 @@ export class QValue {
 export class VMachine {
     constructor() {
         this.raw = lib.imqNewVMachine();
+        this.functions = [];
         finalize(this, () => {
             if (!this.raw.isNull())
                 lib.imqDestroyVMachine(this.raw);
@@ -334,6 +392,37 @@ export class VMachine {
             return null;
 
         return new QValue(result);
+    }
+
+    setValue(key, value) {
+        return lib.imqSetValue(this.raw, key, value.raw);
+    }
+
+    getValue(key) {
+        var result = lib.imqGetValue(this.raw, key);
+        if (result.isNull()) {
+            return null;
+        }
+
+        return new QValue(result);
+    }
+
+    registerFunction(name, func) {
+        var val = QValue.Function(this, func);
+        this.functions.push(val);
+        return this.setValue(name, val);
+    }
+
+    registerFunctions(list) {
+        for (var i = 0; i < list.length; ++i) {
+            var def = list[i];
+            if (!this.registerFunction(def.name, def.func)) {
+                console.warn('Unable to register function "' + def.name + '"');
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
