@@ -4,7 +4,7 @@
 export default {
     keywords: [
         'func', 'delete', 'break', 'return', 'in', 'where', 'out', 'from', 'if', 'else',
-        'for', 'while', 'do', 'loop'
+        'for', 'while', 'do', 'loop', 'import', 'export'
     ],
 
     valueKeywords: [
