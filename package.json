@@ -45,7 +45,7 @@
     "chai": "^3.5.0",
     "chokidar": "^1.6.1",
     "devtron": "^1.4.0",
-    "electron": "^1.4.7",
+    "electron": "^9.1.0",
     "electron-builder": "^8.6.0",
     "electron-mocha": "^3.0.0",
     "electron-rebuild": "^1.5.7",
